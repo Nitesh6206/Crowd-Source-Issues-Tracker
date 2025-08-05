@@ -1,21 +1,21 @@
 package NKS.crowdsourced_issue_tracker.controller;
 
-
 import NKS.crowdsourced_issue_tracker.dto.LoginRequest;
 import NKS.crowdsourced_issue_tracker.dto.LoginResponse;
 import NKS.crowdsourced_issue_tracker.dto.UserDTO;
 import NKS.crowdsourced_issue_tracker.model.User;
-import NKS.crowdsourced_issue_tracker.service.JwtService;
+import NKS.crowdsourced_issue_tracker.config.JwtService;
 import NKS.crowdsourced_issue_tracker.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AuthController {
 
     private final UserService userService;
@@ -43,13 +43,15 @@ public class AuthController {
                 )
         );
 
-        User user = (User) authentication.getPrincipal();
-        String jwt = jwtService.generateToken(user);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String jwt = jwtService.generateToken(userDetails);
         LoginResponse response = new LoginResponse();
         response.setToken(jwt);
-        response.setUsername(user.getUsername());
-        response.setRole(user.getRole().name());
+        response.setUsername(userDetails.getUsername());
+        response.setRole(userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(auth -> auth.getAuthority().replace("ROLE_", ""))
+                .orElse(""));
         return ResponseEntity.ok(response);
     }
 }
-

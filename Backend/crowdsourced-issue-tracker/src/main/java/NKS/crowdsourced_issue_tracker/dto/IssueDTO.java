@@ -7,11 +7,13 @@ public class IssueDTO {
     private String title;
     private String description;
     private String photo;
-    private double latitude;
-    private double longitude;
+    private String location;
+    private String category;
+    private String priorityLevel;
     private String city;
     private IssueStatus status;
     private String resolvedPhoto;
+    private String reportedBy;
 }
 
 

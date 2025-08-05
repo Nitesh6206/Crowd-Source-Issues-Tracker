@@ -16,9 +16,10 @@ public class Issue {
     private String title;
     private String description;
     private String photo; // Base64 encoded image
-    private double latitude;
-    private double longitude;
+    private String location;
     private String city;
+    private String category;
+    private String priorityLevel;
     private String reportedBy;
     private IssueStatus status = IssueStatus.PENDING;
     private String resolvedPhoto; // Base64 encoded image

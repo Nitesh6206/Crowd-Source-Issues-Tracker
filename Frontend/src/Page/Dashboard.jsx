@@ -1,110 +1,287 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react"
+import {
+  Camera, FileText, Eye, Search, Calendar, MapPin
+} from 'lucide-react'
+import { Link } from "react-router-dom"
+import axiosInstance from "../Config/axios"
 
-const Dashboard = () => {
-  const navigate = useNavigate();
+export default function Dashboard() {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterStatus, setFilterStatus] = useState("all")
+  const [recentIssues, setRecentIssues] = useState([])
+  const [stats, setStats] = useState([])
+
+  const getStatusConfig = (status) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return { bg: "bg-red-50", text: "text-red-700", border: "border-red-200", dot: "bg-red-400" }
+      case "in-progress":
+        return { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", dot: "bg-amber-400" }
+      case "resolved":
+        return { bg: "bg-green-50", text: "text-green-700", border: "border-green-200", dot: "bg-green-400" }
+      default:
+        return { bg: "bg-gray-50", text: "text-gray-700", border: "border-gray-200", dot: "bg-gray-400" }
+    }
+  }
+
+  const getPriorityConfig = (priority) => {
+    switch ((priority || "").toLowerCase()) {
+      case "high":
+        return { color: "text-red-600", bg: "bg-red-100", label: "High Priority" }
+      case "medium":
+        return { color: "text-amber-600", bg: "bg-amber-100", label: "Medium Priority" }
+      case "low":
+        return { color: "text-green-600", bg: "bg-green-100", label: "Low Priority" }
+      default:
+        return { color: "text-gray-600", bg: "bg-gray-100", label: "Normal" }
+    }
+  }
+
+  useEffect(() => {
+    getLatestIssues()
+    fetchDashboardData()
+  }, [])
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await axiosInstance.get("/dashboard/city/Jamshedpur")
+      const dashboardData = response.data
+
+      const finalStats = [
+        {
+          label: "Total Issues",
+          value: dashboardData.totalIssues || 0,
+          trend: "+0%",
+          color: "bg-blue-600",
+          lightColor: "bg-blue-100"
+        },
+        {
+          label: "Resolved",
+          value: dashboardData.resolvedIssues || 0,
+          trend: "+0%",
+          color: "bg-green-600",
+          lightColor: "bg-green-100"
+        },
+        {
+          label: "Pending",
+          value: dashboardData.pendingIssues || 0,
+          trend: "+0%",
+          color: "bg-red-600",
+          lightColor: "bg-red-100"
+        },
+        {
+          label: "Top Liked",
+          value: dashboardData.topLikedIssues?.length || 0,
+          trend: "+0%",
+          color: "bg-purple-600",
+          lightColor: "bg-purple-100"
+        }
+      ]
+
+      setStats(finalStats)
+    } catch (error) {
+      console.error("Failed to fetch dashboard data", error)
+    }
+  }
+
+  const getLatestIssues = async () => {
+    try {
+      const response = await axiosInstance.get("/issues/latest/posts")
+      const issues = response.data.map(issue => ({
+        ...issue,
+        status: issue.status.toLowerCase(),
+        priority: issue.priorityLevel?.toLowerCase() || "normal",
+        likes: issue.likedBy.length,
+        time: new Date(issue.createdAt).toLocaleString(),
+        image: issue.photo
+      }))
+      setRecentIssues(issues)
+    } catch (error) {
+      console.error("Error fetching latest issues:", error)
+    }
+  }
+
+  const filteredIssues = recentIssues.filter(issue => {
+    const search = searchTerm.toLowerCase()
+    const matchesSearch = issue.title.toLowerCase().includes(search) ||
+                          issue.location.toLowerCase().includes(search) ||
+                          (issue.category || "").toLowerCase().includes(search)
+    const matchesFilter = filterStatus === "all" || issue.status === filterStatus
+    return matchesSearch && matchesFilter
+  })
+
+  const navigate = (path) => {
+    window.location.href = path // Optional: replace with `useNavigate()` from react-router-dom
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      {/* Header */}
-      <div className="bg-white p-4 rounded-lg shadow mb-4">
-        <h1 className="text-2xl font-bold">Welcome, Nitesh! 👋</h1>
-        <p className="text-gray-600">Here’s what’s happening in your area today.</p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-      {/* Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Quick Actions */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-          <button
-            className="w-full bg-black text-white py-2 rounded mb-2"
-            onClick={() => navigate('/reportIssue')}
-          >
-            📸 Report New Issue
-          </button>
-          <button className="w-full border border-gray-300 py-2 rounded">
-            📍 My Reports
-          </button>
-        </div>
-
-        {/* Stats Overview */}
-        <div className="bg-white p-4 rounded-lg shadow col-span-1 md:col-span-1">
-          <h3 className="text-lg font-semibold mb-4">Overview</h3>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="bg-blue-100 text-blue-800 py-2 rounded">
-              <p className="text-xl font-bold">12</p>
-              <p className="text-sm">New</p>
-            </div>
-            <div className="bg-yellow-100 text-yellow-800 py-2 rounded">
-              <p className="text-xl font-bold">8</p>
-              <p className="text-sm">In Progress</p>
-            </div>
-            <div className="bg-green-100 text-green-800 py-2 rounded">
-              <p className="text-xl font-bold">30</p>
-              <p className="text-sm">Resolved</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Issues */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4">Recent Issues</h3>
-          {[
-            {
-              title: 'Pothole on Main Street',
-              location: 'Downtown, Main St & 5th Ave',
-              status: 'pending',
-              likes: 23,
-              time: '2 hours ago',
-            },
-            {
-              title: 'Broken Street Light',
-              location: 'Park Avenue, Block 12',
-              status: 'in-progress',
-              likes: 15,
-              time: '5 hours ago',
-            },
-            {
-              title: 'Illegal Waste Dumping',
-              location: 'Industrial Area, Sector 7',
-              status: 'resolved',
-              likes: 31,
-              time: '1 day ago',
-            },
-          ].map((issue, idx) => (
-            <div key={idx} className="mb-4">
-              <p className="font-semibold">{issue.title}</p>
-              <p className="text-sm text-gray-500">{issue.location}</p>
-              <div className="flex items-center text-sm mt-1">
-                <span
-                  className={`px-2 py-0.5 rounded-full text-white text-xs mr-2
-                    ${
-                      issue.status === 'pending'
-                        ? 'bg-yellow-500'
-                        : issue.status === 'in-progress'
-                        ? 'bg-blue-500'
-                        : 'bg-green-600'
-                    }`}
-                >
-                  {issue.status}
-                </span>
-                <span className="text-gray-500">
-                  {issue.likes} likes • {issue.time}
-                </span>
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat, index) => (
+            <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                    <span className="text-sm font-medium text-green-600">{stat.trend}</span>
+                  </div>
+                </div>
+                <div className={`w-12 h-12 ${stat.lightColor} rounded-lg flex items-center justify-center`}>
+                  <div className={`w-6 h-6 ${stat.color} rounded`}></div>
+                </div>
               </div>
             </div>
           ))}
-          <button
-            className="mt-2 w-full text-center text-blue-500 hover:underline"
-            onClick={() => navigate('/AllIssues')}
-          >
-            View All Issues
-          </button>
+        </div>
+                {/* Main Content */}
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar - Quick Actions */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="space-y-3">
+                <Link
+                 to="/report-issue"
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Camera className="w-5 h-5" />
+                  <span className="font-medium">Report New Issue</span>
+                </Link>
+                <Link
+                  to="/my-reports"
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  <FileText className="w-5 h-5" />
+                  <span className="font-medium">My Reports</span>
+                </Link>
+                <Link
+                  to="/all-issues"
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  <Eye className="w-5 h-5" />
+                  <span className="font-medium">View All Issues</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Category Filter */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Categories</h3>
+              <div className="space-y-2">
+                {["Infrastructure", "Utilities", "Environment", "Safety", "Vandalism"].map(category => (
+                  <button key={category} className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                    {category}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content - Issues List */}
+          <div className="lg:col-span-3">
+        
+
+        {/* Recent Issues */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row gap-4 justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Recent Issues</h2>
+                <p className="text-sm text-gray-600 mt-1">Stay updated with the latest community reports</p>
+              </div>
+              <div className="flex gap-3 w-full sm:w-auto">
+                <div className="relative flex-1 sm:w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search issues..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="resolved">Resolved</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6">
+            {filteredIssues.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 text-4xl mb-4">🔍</div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No issues found</h3>
+                <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {filteredIssues.map(issue => {
+                  const statusConfig = getStatusConfig(issue.status)
+                  const priorityConfig = getPriorityConfig(issue.priority)
+                  return (
+                    <div
+                      key={issue.id}
+                      onClick={() => navigate(`/issue/${issue.id}`)}
+                      className="border border-gray-200 rounded-lg p-5 hover:shadow-md hover:border-gray-300 transition-all cursor-pointer"
+                    >
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-lg">
+                          📷
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">{issue.title}</h3>
+                          <div className="flex items-center gap-1 text-sm text-gray-600 mb-2">
+                            <MapPin className="w-4 h-4" />
+                            <span className="truncate">{issue.location}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded">
+                              {issue.category || "General"}
+                            </span>
+                            <span className={`px-2 py-1 text-xs font-medium rounded ${priorityConfig.bg} ${priorityConfig.color}`}>
+                              {priorityConfig.label}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div className="flex items-center gap-4">
+                          <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}>
+                            <div className={`w-2 h-2 rounded-full ${statusConfig.dot}`}></div>
+                            {issue.status.replace("-", " ")}
+                          </div>
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
+                            ❤️ <span>{issue.likes}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 text-sm text-gray-500">
+                          <Calendar className="w-4 h-4" />
+                          <span>{issue.time}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+        </div>
         </div>
       </div>
     </div>
-  );
-};
-
-export default Dashboard;
+  )
+}

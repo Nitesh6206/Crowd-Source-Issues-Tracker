@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/issues")
@@ -23,14 +24,14 @@ public class IssueController {
     }
 
     @PostMapping
-    public ResponseEntity<Issue> createIssue(@RequestBody IssueDTO issueDTO) {
-        Issue issue = issueService.createIssue(issueDTO);
-        return ResponseEntity.ok(issue);
+    public ResponseEntity<IssueDTO> createIssue(@RequestBody IssueDTO issueDTO) {
+        IssueDTO issuedto = issueService.createIssue(issueDTO);
+        return ResponseEntity.ok(issuedto);
     }
 
     @PutMapping("/{issueId}/resolve")
-    public ResponseEntity<Issue> resolveIssue(@PathVariable String issueId, @RequestBody IssueDTO issueDTO) {
-        Issue issue = issueService.resolveIssue(issueId, issueDTO);
+    public ResponseEntity<IssueDTO> resolveIssue(@PathVariable String issueId, @RequestBody IssueDTO issueDTO) {
+        IssueDTO issue = issueService.resolveIssue(issueId, issueDTO);
         return ResponseEntity.ok(issue);
     }
 
@@ -40,6 +41,11 @@ public class IssueController {
         Issue issue = issueService.likeIssue(issueId, username);
         return ResponseEntity.ok(issue);
     }
+    @GetMapping("/latest/posts")
+    public ResponseEntity<List<Issue>> recentPost(){
+        List<Issue> issueses=issueService.getLatestIssues();
+        return  ResponseEntity.ok(issueses);
+    }
 
     @GetMapping("/public/city/{city}")
     public ResponseEntity<List<Issue>> getIssuesByCity(@PathVariable String city,
@@ -47,9 +53,16 @@ public class IssueController {
         return ResponseEntity.ok(issueService.getIssuesByCity(city, status));
     }
 
+
     @GetMapping("/department/city/{city}")
     public ResponseEntity<List<Issue>> getDepartmentIssues(@PathVariable String city,
                                                            @RequestParam(required = false) IssueStatus status) {
         return ResponseEntity.ok(issueService.getIssuesByCity(city, status));
+    }
+
+    @GetMapping("/my-issues")
+    public ResponseEntity<Optional<Issue>> getUserCreatedIssues(){
+        String username=SecurityContextHolder.getContext().getAuthentication().getName();
+        return  ResponseEntity.ok(issueService.getUserCreatedIssues(username));
     }
 }

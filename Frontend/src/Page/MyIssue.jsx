@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import axiosInstance from "../Config/axios";
 
-export default function AllIssues() {
+export default function MyIssue() {
   const [issues, setIssues] = useState([]);
   const [dashboard, setDashboard] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -91,10 +91,10 @@ export default function AllIssues() {
     }
   };
 
-  const fetchAllIssues = async () => {
+  const fetchMyIssues = async () => {
     try {
       setIsLoading(true);
-      const response = await axiosInstance.get("/issues/public/city/Jamshedpur");
+      const response = await axiosInstance.get("/issues/my-issues");
       setIssues(response.data);
     } catch (error) {
       console.error("Failed to fetch issues", error);
@@ -103,51 +103,9 @@ export default function AllIssues() {
     }
   };
 
-  const fetchDashboardData = async () => {
-    try {
-      const response = await axiosInstance.get("/dashboard/city/Jamshedpur")
-      const dashboardData = response.data
-
-      const finalStats = [
-        {
-          label: "Total Issues",
-          value: dashboardData.totalIssues || 0,
-          trend: "+0%",
-          color: "bg-blue-600",
-          lightColor: "bg-blue-100"
-        },
-        {
-          label: "Resolved",
-          value: dashboardData.resolvedIssues || 0,
-          trend: "+0%",
-          color: "bg-green-600",
-          lightColor: "bg-green-100"
-        },
-        {
-          label: "Pending",
-          value: dashboardData.pendingIssues || 0,
-          trend: "+0%",
-          color: "bg-red-600",
-          lightColor: "bg-red-100"
-        },
-        {
-          label: "Top Liked",
-          value: dashboardData.topLikedIssues?.length || 0,
-          trend: "+0%",
-          color: "bg-purple-600",
-          lightColor: "bg-purple-100"
-        }
-      ]
-
-      setStats(finalStats)
-    } catch (error) {
-      console.error("Failed to fetch dashboard data", error)
-    }
-  }
 
   useEffect(() => {
-    fetchAllIssues();
-    fetchDashboardData();
+    fetchMyIssues();
   }, []);
 
   const filteredAndSortedIssues = issues
@@ -189,8 +147,7 @@ export default function AllIssues() {
     });
 
   const refreshData = () => {
-    fetchAllIssues();
-    fetchDashboardData();
+    fetchMyIssues();
   };
 
   if (isLoading) {
@@ -207,43 +164,6 @@ export default function AllIssues() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Community Issues</h1>
-              <p className="text-gray-600">Track and engage with issues that matter to your community</p>
-            </div>
-            <button
-              onClick={refreshData}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </button>
-          </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                  <div className="flex items-baseline gap-2 mt-1">
-                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                    <span className="text-sm font-medium text-green-600">{stat.trend}</span>
-                  </div>
-                </div>
-                <div className={`w-12 h-12 ${stat.lightColor} rounded-lg flex items-center justify-center`}>
-                  <div className={`w-6 h-6 ${stat.color} rounded`}></div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        </div>
 
         {/* Search and Filters */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
