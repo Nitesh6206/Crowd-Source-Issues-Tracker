@@ -45,9 +45,10 @@
  
 ## 🧩 Project Insight
 <img width="1269" height="675" alt="Screenshot 2025-08-05 a<img width="1269" height="675" alt="Screenshot 2025-08-05 at 8 54 40 PM" src="https://github.com/user-attachments/assets/bc485a55-14e4-42ae-917b-37cd0225322d" />
-t 8 55 01 PM" src="https://github.com/user-attachments/assets/5f246e10-7f98-48b7-9
 <img width="1269" height="675" alt="Screenshot 2025-08-05 at 8 54 22 PM" src="https://github.com/user-attachments/assets/da7ab454-4951-49cc-ba4d-681737096734" />
 3a0-b067323120eb" />
+<img width="1269" height="675" alt="Screenshot 2025-08-05 at 8 55 01 PM" src="https://github.com/user-attachments/assets/86428e97-9cc5-4ffd-9784-5b5eefaa6e60" />
+
 
 
 
