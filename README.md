@@ -1,71 +1,105 @@
+# 🛠️ Crowd-Source Issues Tracker
+
+A collaborative issue tracking system that enables users to report, assign, and manage issues in an organized and efficient way. Designed for teams and communities to streamline issue resolution with transparency and accountability.
+
+---
 
 ## 🧩 Installation
 
-1. Clone the repo:  
+1. Clone the repository:  
    `git clone https://github.com/Nitesh6206/Crowd-Source-Issues-Tracker.git`
 
 2. Install dependencies:
 
-   ***Backend***  
-   - Navigate to `/Backend`  
-   - Install any package requirements (e.g. `npm install`, `mvn install`, pip, etc.)
+   **Backend**  
+   - Navigate to the backend directory:  
+     `cd Backend`  
+   - Install the required packages:  
+     `mvn install`
 
-   ***Frontend***  
-   - Navigate to `/Frontend`  
-   - Run: `npm install` or equivalent
+   **Frontend**  
+   - Navigate to the frontend directory:  
+     `cd ../Frontend`  
+   - Install the required packages:  
+     `npm install`
 
-3. Database setup:  
-   - Create a new database (e.g. `crowd_issues_db`)  
-   - Update configuration file (e.g. `.env`, `application.properties`) with your connection credentials
+3. Set up the database:  
+   - Create a database (e.g., `crowd_issues_db`)  
+   - Update configuration in `application.properties` (for backend) and `.env` (for frontend, if used)
 
-4. Apply migrations or schemas (if needed):
-   - Example: `npm run migrate`, `mvn flyway:migrate`, or run SQL scripts
+4. Apply database migrations (if needed):  
+   - Run: `mvn flyway:migrate` or use provided SQL scripts
 
-5. Launch the app:
-   - Start backend: `npm start`, `mvn spring-boot:run`, etc.  
-   - Start frontend dev server: `npm run dev` or similar  
-   - Default access at: `http://localhost:3000` (frontend) and `http://localhost:8080` (backend)
+5. Launch the application:  
+   - Start the backend server:  
+     `mvn spring-boot:run`  
+   - Start the frontend development server:  
+     `npm run dev`  
+   - Application accessible at:  
+     - Frontend → `http://localhost:3000`  
+     - Backend → `http://localhost:8080`
+
+---
 
 ## 🎯 Usage
 
-- Register a user or login  
-- Submit an issue with title, description, category, etc.  
-- View issue list, filter or search  
-- Assign or claim assigned issues  
-- Post comments or updates  
-- Update issue status (Open → In Progress → Resolved)  
-- Admin: view reports or analytics of recent activity  
+- Register or login to your account  
+- Submit issues with relevant details like title, description, and category  
+- Browse and search submitted issues  
+- Filter issues based on status or assignee  
+- Assign or claim issues  
+- Add comments and track discussion  
+- Update issue status: **Open → In Progress → Resolved**  
+- Admins can monitor overall progress and view analytics
+
+---
 
 ## 🧪 Development & Testing
 
-- Testing frameworks: e.g. Jest, Mocha, JUnit, etc.  
-- To run tests:  
-  - Backend: `npm test` or `mvn test`  
-  - Frontend: `npm test` or `yarn test`
- 
-## 🧩 Project Insight
-<img width="1269" height="675" alt="Screenshot 2025-08-05 a<img width="1269" height="675" alt="Screenshot 2025-08-05 at 8 54 40 PM" src="https://github.com/user-attachments/assets/bc485a55-14e4-42ae-917b-37cd0225322d" />
-<img width="1269" height="675" alt="Screenshot 2025-08-05 at 8 54 22 PM" src="https://github.com/user-attachments/assets/da7ab454-4951-49cc-ba4d-681737096734" />
-3a0-b067323120eb" />
-<img width="1269" height="675" alt="Screenshot 2025-08-05 at 8 55 01 PM" src="https://github.com/user-attachments/assets/86428e97-9cc5-4ffd-9784-5b5eefaa6e60" />
+- **Testing Tools:** JUnit (Backend), Jest (Frontend)
+- Run tests:
 
+  **Backend:**  
+  `mvn test`
 
+  **Frontend:**  
+  `npm test` or `yarn test`
 
+---
+
+## 📸 Project Insight
+
+Take a look at the interface in action:
+
+<img width="100%" alt="Dashboard Screenshot" src="https://github.com/user-attachments/assets/bc485a55-14e4-42ae-917b-37cd0225322d" />
+
+<img width="100%" alt="Issue List View" src="https://github.com/user-attachments/assets/da7ab454-4951-49cc-ba4d-681737096734" />
+
+<img width="100%" alt="Admin Panel" src="https://github.com/user-attachments/assets/86428e97-9cc5-4ffd-9784-5b5eefaa6e60" />
+
+---
 
 ## 🤝 Contributing
 
-Contributions are welcome!  
-Please:
+Contributions are highly appreciated!  
+To contribute:
 
-1. Fork the repo  
-2. Create a topic branch: `git checkout -b feature/XYZ`  
-3. Implement your changes and commit with clear message  
-4. Push to your fork and open a Pull Request  
-5. Be responsive to review feedback
+1. Fork the repository  
+2. Create a new branch:  
+   `git checkout -b feature/your-feature-name`  
+3. Make your changes and commit:  
+   `git commit -m "Your message"`  
+4. Push to your fork:  
+   `git push origin feature/your-feature-name`  
+5. Open a Pull Request and describe your changes
 
-Ensure your code follows the formatting & style conventions.
+> Please ensure your code follows the existing style and includes necessary tests where applicable.
+
+---
 
 ## 📄 License
 
-Add your license info here, for example:
+This project is licensed under the **MIT License**.  
+For more details, refer to the [LICENSE](LICENSE) file.
 
+---
