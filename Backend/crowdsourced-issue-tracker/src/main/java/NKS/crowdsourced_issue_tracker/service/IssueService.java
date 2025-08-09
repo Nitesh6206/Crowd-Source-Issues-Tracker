@@ -20,8 +20,8 @@ public class IssueService {
     private final IssueRepository issueRepository;
 
     private  final IssueMapper issueMapper;
-    public Optional<Issue> getUserCreatedIssues(String username){
-        return issueRepository.findByUsername(username);
+    public Optional<List<Issue>> getUserCreatedIssues(String username){
+        return issueRepository.findByReportedBy(username);
     }
 
     public IssueService(IssueRepository issueRepository,IssueMapper issueMapper) {

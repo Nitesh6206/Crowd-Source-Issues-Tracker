@@ -15,7 +15,7 @@ public interface IssueRepository extends MongoRepository<Issue, String> {
 
     List<Issue> findTop5ByOrderByCreatedAtDesc();
 
-    Optional<Issue> findByUsername(String username);
+    Optional<List<Issue>> findByReportedBy(String username);
 }
 
 

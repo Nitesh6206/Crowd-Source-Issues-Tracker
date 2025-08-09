@@ -61,7 +61,7 @@ public class IssueController {
     }
 
     @GetMapping("/my-issues")
-    public ResponseEntity<Optional<Issue>> getUserCreatedIssues(){
+    public ResponseEntity<Optional<List<Issue>>> getUserCreatedIssues(){
         String username=SecurityContextHolder.getContext().getAuthentication().getName();
         return  ResponseEntity.ok(issueService.getUserCreatedIssues(username));
     }

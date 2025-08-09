@@ -1,6 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, use } from "react";
 import { LogOut, Settings, User, Bell, Search, Menu, X, Home, FileText, BarChart3, HelpCircle, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../store/authSlice";
 
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -10,13 +12,9 @@ const Header = () => {
   const [notifications, setNotifications] = useState(3);
   const profileRef = useRef(null);
 
-  // Mock user data - replace with your Redux selector
-  const user = {
-    name: "Nitesh Kumar",
-    email: "nitesh@gmail.com",
-    avatar: null,
-    role: "Community Member"
-  };
+
+  const userData = useSelector((state) => state.auth.user);
+
 
   // Mock navigation function - replace with your useNavigate
   const navigate = (path) => {
@@ -25,8 +23,7 @@ const Header = () => {
 
   // Mock logout function - replace with your dispatch logic
   const handleLogout = () => {
-    console.log("Logging out...");
-    navigate("/login");
+    dispatch(logout());
   };
 
   // Close profile dropdown when clicking outside
@@ -94,7 +91,7 @@ const Header = () => {
           </div>
 
           {/* Center Section - Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
+          {/* <div className="hidden md:flex flex-1 max-w-md mx-8">
             <div className={`relative w-full transition-all duration-200 ${isSearchFocused ? 'scale-105' : ''}`}>
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className={`w-5 h-5 transition-colors ${isSearchFocused ? 'text-blue-500' : 'text-gray-400'}`} />
@@ -119,7 +116,7 @@ const Header = () => {
                 </button>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* Right Section - Actions & Profile */}
           <div className="flex items-center gap-3">
@@ -149,14 +146,14 @@ const Header = () => {
                 className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                  {user?.name
-                    ? user.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
+                  {userData?.username
+                    ? userData.username.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
                     : <User className="w-4 h-4" />
                   }
                 </div>
                 <div className="hidden sm:block text-left">
-                  <p className="text-sm font-medium text-gray-900">{user?.name || "User"}</p>
-                  <p className="text-xs text-gray-500">{user?.role || "Member"}</p>
+                  <p className="text-sm font-medium text-gray-900">{userData?.username || "User"}</p>
+                  {/* <p className="text-xs text-gray-500">{userData?.role || "Member"}</p> */}
                 </div>
                 <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -168,16 +165,16 @@ const Header = () => {
                   <div className="px-4 py-3 border-b border-gray-100">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md">
-                        {user?.name
-                          ? user.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
+                        {userData?.username
+                          ? userData.username.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
                           : <User className="w-6 h-6" />
                         }
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900">{user?.name || "User Name"}</p>
-                        <p className="text-sm text-gray-500">{user?.email || "user@example.com"}</p>
+                        <p className="font-semibold text-gray-900">{userData?.username || "User Name"}</p>
+                        <p className="text-sm text-gray-500">{userData?.email || "user@example.com"}</p>
                         <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full mt-1">
-                          {user?.role || "Community Member"}
+                          {userData?.role || "Citizen"}
                         </span>
                       </div>
                     </div>

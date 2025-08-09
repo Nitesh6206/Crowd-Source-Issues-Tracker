@@ -1,9 +1,15 @@
-import { useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
+import { useSelector } from "react-redux";
+import { Navigate, Outlet } from "react-router-dom";
+import Header from "./Header";
 
-function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useSelector((state) => state.auth);
-  return isAuthenticated ? children : <Navigate to="/login" />;
+export default function ProtectedLayout() {
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  return (
+    <>
+      <Header />
+      <Outlet />
+    </>
+  );
 }
-
-export default ProtectedRoute;
