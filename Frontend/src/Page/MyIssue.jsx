@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   Search,
-  Filter,
-  TrendingUp,
   MapPin,
   User,
   Calendar,
@@ -13,19 +11,11 @@ import {
   CheckCircle,
   Grid3X3,
   List,
-  SortAsc,
-  SortDesc,
-  ChevronDown,
-  RefreshCw,
-  BarChart3,
-  Users,
-  Activity
 } from "lucide-react";
 import axiosInstance from "../Config/axios";
 
 export default function MyIssue() {
   const [issues, setIssues] = useState([]);
-  const [dashboard, setDashboard] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [viewMode, setViewMode] = useState("grid"); // grid or list

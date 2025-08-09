@@ -21,7 +21,8 @@ export const clearAuthToken = () => {
 };
 
 // Set token if already stored
-const storedUser = JSON.parse(localStorage.getItem("user"));
+const storedUserString = sessionStorage.getItem("user");
+const storedUser = JSON.parse(storedUserString);
 if (storedUser?.token) {
   setAuthToken(storedUser.token);
 }

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   User,
   Mail,
@@ -36,6 +36,21 @@ export default function Profile() {
     { label: "Community Impact", value: 156, color: "from-purple-500 to-pink-600", icon: Heart },
     { label: "Likes Received", value: 89, color: "from-orange-500 to-red-600", icon: MessageCircle },
   ]
+
+  useEffect(()=>{
+    fetchUseDetails()
+  }, [])
+  const fetchUseDetails = async () => {
+    try {
+      // Simulate API call to fetch user details
+      const response = await axiosInstance.get("/user/profile");
+      setProfileData(response.data);
+      setEditData(response.data);
+    } catch (error) {
+      console.error("Failed to fetch user details:", error);
+      // Handle error (e.g., show notification)
+    }
+  }
 
   const recentActivity = [
     {
