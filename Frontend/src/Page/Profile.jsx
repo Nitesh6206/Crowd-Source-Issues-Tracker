@@ -16,17 +16,19 @@ import {
   MessageCircle,
 } from "lucide-react"
 import { motion } from "framer-motion"
+import axiosInstance from "../Config/axios"
+import { a } from "framer-motion/client"
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false)
   const [profileData, setProfileData] = useState({
-    name: "Nitesh Kumar",
-    email: "nitesh@example.com",
-    phone: "+91 98765 43210",
-    location: "Mumbai, Maharashtra",
-    joinDate: "January 2024",
-    bio: "Community advocate passionate about making our neighborhood a better place to live. I believe in the power of collective action and civic engagement.",
-    avatar: "/placeholder.svg?height=120&width=120&text=NK",
+    // name: "Nitesh Kumar",
+    // email: "nitesh@example.com",
+    // phone: "+91 98765 43210",
+    // location: "Mumbai, Maharashtra",
+    // joinDate: "January 2024",
+    // bio: "Community advocate passionate about making our neighborhood a better place to live. I believe in the power of collective action and civic engagement.",
+    // avatar: "/placeholder.svg?height=120&width=120&text=NK",
   })
   const [editData, setEditData] = useState({ ...profileData })
 
@@ -37,13 +39,14 @@ export default function Profile() {
     { label: "Likes Received", value: 89, color: "from-orange-500 to-red-600", icon: MessageCircle },
   ]
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchUseDetails()
   }, [])
   const fetchUseDetails = async () => {
     try {
       // Simulate API call to fetch user details
-      const response = await axiosInstance.get("/user/profile");
+      const response = await axiosInstance.get("auth/user-details");
+      console.log("User details fetched:", response.data);
       setProfileData(response.data);
       setEditData(response.data);
     } catch (error) {
@@ -77,8 +80,25 @@ export default function Profile() {
   ]
 
   const handleSave = () => {
-    setProfileData({ ...editData })
-    setIsEditing(false)
+    try {
+      setProfileData({ ...editData })
+      setIsEditing(false)
+      saveUserDetails()
+
+    } catch (error) {
+      console.error("Failed to save user details:", error);
+    }
+  }
+
+  const saveUserDetails = async () => {
+    try {
+      const response = await axiosInstance.put("auth/update-user-details", editData);
+      console.log("User details saved:", response.data);
+      setProfileData(response.data);
+    } catch (error) {
+      console.error("Failed to save user details:", error);
+      // Handle error (e.g., show notification)
+    }
   }
 
   const handleCancel = () => {
@@ -164,7 +184,7 @@ export default function Profile() {
                     )}
                   </div>
                   <div className="mt-6 text-center">
-                    <h3 className="text-2xl font-bold text-gray-900">{profileData.name}</h3>
+                    <h3 className="text-2xl font-bold text-gray-900">{profileData.username}</h3>
                     <p className="text-gray-600 font-medium">Community Member</p>
                     <div className="flex items-center justify-center gap-2 mt-2">
                       <div className="w-2 h-2 bg-green-400 rounded-full"></div>
@@ -177,17 +197,17 @@ export default function Profile() {
                 <div className="flex-1 space-y-6">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {[
-                      { icon: User, label: "Full Name", field: "name", type: "text" },
+                      { icon: User, label: "Username", field: "username", type: "text" },
                       { icon: Mail, label: "Email Address", field: "email", type: "email" },
-                      { icon: Phone, label: "Phone Number", field: "phone", type: "tel" },
-                      { icon: MapPin, label: "Location", field: "location", type: "text" },
+                      { icon: Phone, label: "Phone Number", field: "number", type: "tel" },
+                      { icon: MapPin, label: "Location", field: "city", type: "text" },
                     ].map((item, index) => (
                       <div key={index} className="space-y-2">
                         <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                           {item.icon && <item.icon className="w-4 h-4 text-blue-500" />}
                           {item.label}
                         </label>
-                        {isEditing ? (
+                        {item.label !== "Username" && isEditing ? (
                           <input
                             type={item.type}
                             value={editData[item.field]}
@@ -245,13 +265,12 @@ export default function Profile() {
                       <p className="text-sm text-gray-500 font-medium">{activity.date}</p>
                     </div>
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        activity.status === "resolved"
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${activity.status === "resolved"
                           ? "bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200"
                           : activity.status === "in-progress"
                             ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200"
                             : "bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border border-amber-200"
-                      }`}
+                        }`}
                     >
                       {activity.status.replace("-", " ")}
                     </span>

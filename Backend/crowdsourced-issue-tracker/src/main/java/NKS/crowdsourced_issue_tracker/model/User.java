@@ -18,5 +18,7 @@ public class User {
     private String email;
     private Role role;
     private String city;
+    private String  number;
+    private String bio;
     private boolean enabled = true;
 }

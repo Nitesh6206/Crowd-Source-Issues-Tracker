@@ -7,11 +7,10 @@ import { logout } from "../store/authSlice";
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [notifications, setNotifications] = useState(3);
   const profileRef = useRef(null);
 
+  const dispatch = useDispatch();
 
   const userData = useSelector((state) => state.auth.user);
 

@@ -19,6 +19,7 @@ const authSlice = createSlice({
     },
     logout(state) {
       state.user = null;
+      console.log(state.user,"user logged out");
       state.isAuthenticated = false;
       sessionStorage.removeItem("user");
     },

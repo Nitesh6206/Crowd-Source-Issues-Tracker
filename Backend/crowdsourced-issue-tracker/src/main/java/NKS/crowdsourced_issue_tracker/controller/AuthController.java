@@ -6,12 +6,16 @@ import NKS.crowdsourced_issue_tracker.dto.UserDTO;
 import NKS.crowdsourced_issue_tracker.model.User;
 import NKS.crowdsourced_issue_tracker.config.JwtService;
 import NKS.crowdsourced_issue_tracker.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -53,5 +57,20 @@ public class AuthController {
                 .map(auth -> auth.getAuthority().replace("ROLE_", ""))
                 .orElse(""));
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/user-details")
+    public ResponseEntity<Optional<UserDTO>> getUserDetails(){
+       String  username= SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<UserDTO> userDetails=userService.getUserDetails(username);
+
+        return new ResponseEntity<>(userDetails, HttpStatus.OK);
+    }
+    @PutMapping("/update-user-details")
+    public  ResponseEntity<UserDTO> updateUserDetails(@RequestBody UserDTO userDTO){
+        System.out.println(userDTO);
+        UserDTO userDTO1=userService.UpdateUserDetails(userDTO);
+
+        return new ResponseEntity<>(userDTO1,HttpStatus.ACCEPTED);
     }
 }
