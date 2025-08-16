@@ -7,6 +7,11 @@ import NKS.crowdsourced_issue_tracker.model.Issue;
 import NKS.crowdsourced_issue_tracker.model.IssueStatus;
 import NKS.crowdsourced_issue_tracker.model.User;
 import NKS.crowdsourced_issue_tracker.repository.IssueRepository;
+import NKS.crowdsourced_issue_tracker.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -19,13 +24,24 @@ public class IssueService {
 
     private final IssueRepository issueRepository;
 
+    @Autowired
+    private JavaMailSender mailSender;
+
+    @Value("${sendemail}")
+    private String senderEmail;
+
+
+
+    private  final UserRepository userRepository;
+
     private  final IssueMapper issueMapper;
     public Optional<List<Issue>> getUserCreatedIssues(String username){
         return issueRepository.findByReportedBy(username);
     }
 
-    public IssueService(IssueRepository issueRepository,IssueMapper issueMapper) {
+    public IssueService(IssueRepository issueRepository, UserRepository userRepository, IssueMapper issueMapper) {
         this.issueRepository = issueRepository;
+        this.userRepository = userRepository;
         this.issueMapper=issueMapper;
     }
 
@@ -78,5 +94,36 @@ public class IssueService {
 
     public List<Issue> getLatestIssues() {
         return issueRepository.findTop5ByOrderByCreatedAtDesc();
+    }
+
+    public String updateIssues(String issueId, IssueDTO issueDTO) {
+        Issue issue=issueRepository.findById(issueId)
+                .orElseThrow(()-> new RuntimeException("issues not found"));
+        issue.setStatus(issueDTO.getStatus());
+        issueRepository.save(issue);
+        sendNotification(issueDTO,issue.getReportedBy());
+
+        return "Issues Status Update Successfully";
+    }
+
+
+    public void sendEmail(String email,String subject,String text) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(senderEmail);
+        message.setTo(email);
+        message.setSubject(subject);
+        message.setText(text);
+        mailSender.send(message);
+    }
+
+    public void  sendNotification(IssueDTO issueDTO,String username){
+        System.out.println(username);
+        User user=userRepository.findByUsername(username)
+                .orElseThrow(()-> new RuntimeException("Reported user not found"));
+        String message="Status Updated on you issues reported";
+        String  subject="status updated";
+
+            sendEmail(user.getEmail(),subject,message);
+
     }
 }

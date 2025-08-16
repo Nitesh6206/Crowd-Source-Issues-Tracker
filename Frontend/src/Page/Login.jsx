@@ -35,7 +35,7 @@ export default function Login() {
       })
       const { token, username: returnedUsername, role } = response.data;
       setAuthToken(token);
-      dispatch(login({ username: returnedUsername, role, token }));
+      dispatch(login({ username: returnedUsername, role, token, city: response.data.city }));
       navigate('/dashboard');
     } catch (err) {
       setError("Login failed. Please try again.")

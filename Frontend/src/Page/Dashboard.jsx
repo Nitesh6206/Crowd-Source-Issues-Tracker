@@ -4,12 +4,16 @@ import {
 } from 'lucide-react'
 import { Link } from "react-router-dom"
 import axiosInstance from "../Config/axios"
+import { useSelector } from "react-redux"
 
 export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
   const [recentIssues, setRecentIssues] = useState([])
   const [stats, setStats] = useState([])
+
+  const userDetails = useSelector((state) => state.auth.user)
+  console.log(userDetails, "user details in dashboard");
 
   const getStatusConfig = (status) => {
     switch (status.toLowerCase()) {
@@ -151,17 +155,27 @@ export default function Dashboard() {
                   <Camera className="w-5 h-5" />
                   <span className="font-medium">Report New Issue</span>
                 </Link>
-                <Link
-                  to="/my-reports"
-                  className="w-full flex items-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  <FileText className="w-5 h-5" />
+             {userDetails.role === "CITIZEN" ? (
+              <Link
+                to="/my-reports"
+                className="w-full flex items-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <FileText className="w-5 h-5" />
                   <span className="font-medium">My Reports</span>
                 </Link>
-                <Link
-                  to="/all-issues"
-                  className="w-full flex items-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                >
+              ): (
+                 <Link
+                to="/department-issues"
+                className="w-full flex items-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <FileText className="w-5 h-5" />
+                  <span className="font-medium">Pending Tasks</span>
+                </Link>
+              )} 
+                  <Link
+                    to="/all-issues"
+                    className="w-full flex items-center gap-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
                   <Eye className="w-5 h-5" />
                   <span className="font-medium">View All Issues</span>
                 </Link>

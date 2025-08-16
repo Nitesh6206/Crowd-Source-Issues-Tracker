@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLOutput;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,4 +66,12 @@ public class IssueController {
         String username=SecurityContextHolder.getContext().getAuthentication().getName();
         return  ResponseEntity.ok(issueService.getUserCreatedIssues(username));
     }
+
+    @PutMapping("/{issueId}/update-status")
+    public ResponseEntity<String> updateIssuesStatus(@PathVariable String issueId, @RequestBody IssueDTO issueDTO) {
+        System.out.println(issueDTO);
+        String res = issueService.updateIssues(issueId, issueDTO);
+        return ResponseEntity.ok(res);
+    }
+
 }

@@ -2,6 +2,7 @@ package NKS.crowdsourced_issue_tracker.model;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ public class Issue {
     private String description;
     private String photo; // Base64 encoded image
     private String location;
+    @Indexed
     private String city;
     private String category;
     private String priorityLevel;

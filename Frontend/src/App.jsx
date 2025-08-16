@@ -9,6 +9,7 @@ import ReportNewIssue from "./Page/ReportNewIssue";
 import AllIssues from "./Page/AllIssues";
 import MyIssue from "./Page/MyIssue";
 import ProtectedLayout from "./components/ProtectedRoute";
+import DepartmentIssues from "./Page/DepartmentIsuses.jsx";
 
 // Public Auth Layout
 function AuthLayout() {
@@ -50,7 +51,7 @@ export default function App() {
 
         {/* Department-only routes */}
         <Route element={<RoleProtectedRoute allowedRoles={["DEPARTMENT"]} />}>
-          <Route path="/all-issues" element={<AllIssues />} />
+          <Route path="/department-issues" element={<DepartmentIssues />} />
 
         </Route>
 
