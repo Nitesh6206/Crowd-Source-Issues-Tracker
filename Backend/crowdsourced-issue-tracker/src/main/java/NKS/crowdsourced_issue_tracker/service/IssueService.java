@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -125,5 +126,21 @@ public class IssueService {
 
             sendEmail(user.getEmail(),subject,message);
 
+    }
+
+    public Issue toggleLike(String issueId, String username) {
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() -> new RuntimeException("Issue not found"));
+
+        // Check if user already liked
+        if (issue.getLikedBy().contains(username)) {
+            // Unlike
+            issue.getLikedBy().remove(username);
+        } else {
+            // Like
+            issue.getLikedBy().add(username);
+        }
+
+        return issueRepository.save(issue);
     }
 }

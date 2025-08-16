@@ -3,8 +3,8 @@ import { useDispatch } from "react-redux"
 import { useNavigate, Link } from "react-router-dom"
 import { Eye, EyeOff, Mail, Lock, User, MapPin, ArrowRight, Shield, Users, Zap, UserPlus, Building } from 'lucide-react'
 import { motion } from "framer-motion"
-import { register } from "../store/authSlice"
-import axiosInstance, { setAuthToken } from "../Config/axios"
+import { register } from "../../store/authSlice"
+import axiosInstance, { setAuthToken } from "../../Config/axios"
 
 export default function Register() {
   const [formData, setFormData] = useState({

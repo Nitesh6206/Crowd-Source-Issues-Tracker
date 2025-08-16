@@ -1,20 +1,13 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Search,
-  MapPin,
-  User,
-  Calendar,
-  Heart,
-  Eye,
-  AlertTriangle,
-  Clock,
-  CheckCircle,
   Grid3X3,
   List,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
-import axiosInstance from "../Config/axios";
+import axiosInstance from "../../Config/axios";
 import { useSelector } from "react-redux";
+import IssueCard from "../../components/IssueCard";
 
 export default function DepartmentIssues() {
   const [issues, setIssues] = useState([]);
@@ -25,37 +18,13 @@ export default function DepartmentIssues() {
   const [sortOrder, setSortOrder] = useState("desc");
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState([]);
-  const [statusUpdates, setStatusUpdates] = useState({}); // temporary status storage
+  const [statusUpdates, setStatusUpdates] = useState({});
 
-  // Mock navigation function - replace with your actual navigation
-  const navigate = (path) => {
-    console.log(`Navigating to: ${path}`);
-  };
   const userDetails = useSelector((state) => state.auth.user);
   console.log(userDetails.auth.city, "user details in department issues");
 
-  const getStatusConfig = (status) => {
-    switch (status?.toUpperCase()) {
-      case "PENDING":
-        return { bg: "bg-red-50", text: "text-red-700", border: "border-red-200", dot: "bg-red-400", icon: AlertTriangle };
-      case "IN_PROGRESS":
-        return { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", dot: "bg-amber-400", icon: Clock };
-      case "RESOLVED":
-        return { bg: "bg-green-50", text: "text-green-700", border: "border-green-200", dot: "bg-green-400", icon: CheckCircle };
-      case "DECLINED":
-        return { bg: "bg-gray-100", text: "text-gray-700", border: "border-gray-300", dot: "bg-gray-500", icon: AlertTriangle };
-      default:
-        return { bg: "bg-gray-50", text: "text-gray-700", border: "border-gray-200", dot: "bg-gray-400", icon: Clock };
-    }
-  };
-
-  const getPriorityConfig = (priority) => {
-    switch (priority?.toLowerCase()) {
-      case "high": return { color: "text-red-600", bg: "bg-red-100", border: "border-red-200" };
-      case "medium": return { color: "text-amber-600", bg: "bg-amber-100", border: "border-amber-200" };
-      case "low": return { color: "text-green-600", bg: "bg-green-100", border: "border-green-200" };
-      default: return { color: "text-gray-600", bg: "bg-gray-100", border: "border-gray-200" };
-    }
+  const navigate = (path) => {
+    console.log(`Navigating to: ${path}`);
   };
 
   const fetchAllIssues = async () => {
@@ -76,10 +45,34 @@ export default function DepartmentIssues() {
       const dashboardData = response.data;
 
       const finalStats = [
-        { label: "Total Issues", value: dashboardData.totalIssues || 0, trend: "+0%", color: "bg-blue-600", lightColor: "bg-blue-100" },
-        { label: "Resolved", value: dashboardData.resolvedIssues || 0, trend: "+0%", color: "bg-green-600", lightColor: "bg-green-100" },
-        { label: "Pending", value: dashboardData.pendingIssues || 0, trend: "+0%", color: "bg-red-600", lightColor: "bg-red-100" },
-        { label: "Top Liked", value: dashboardData.topLikedIssues?.length || 0, trend: "+0%", color: "bg-purple-600", lightColor: "bg-purple-100" }
+        {
+          label: "Total Issues",
+          value: dashboardData.totalIssues || 0,
+          trend: "+0%",
+          color: "bg-blue-600",
+          lightColor: "bg-blue-100",
+        },
+        {
+          label: "Resolved",
+          value: dashboardData.resolvedIssues || 0,
+          trend: "+0%",
+          color: "bg-green-600",
+          lightColor: "bg-green-100",
+        },
+        {
+          label: "Pending",
+          value: dashboardData.pendingIssues || 0,
+          trend: "+0%",
+          color: "bg-red-600",
+          lightColor: "bg-red-100",
+        },
+        {
+          label: "Top Liked",
+          value: dashboardData.topLikedIssues?.length || 0,
+          trend: "+0%",
+          color: "bg-purple-600",
+          lightColor: "bg-purple-100",
+        },
       ];
 
       setStats(finalStats);
@@ -93,12 +86,10 @@ export default function DepartmentIssues() {
     fetchDashboardData();
   }, []);
 
-  const refreshData = () => {
-    fetchAllIssues();
-    fetchDashboardData();
+  const handleStatusChange = (issueId, newStatus) => {
+    setStatusUpdates((prev) => ({ ...prev, [issueId]: newStatus }));
   };
 
-  // ✅ Professional handler for updating issue status
   const handleStatusSave = async (issueId) => {
     const newStatus = statusUpdates[issueId];
     if (!newStatus) return;
@@ -106,8 +97,9 @@ export default function DepartmentIssues() {
     try {
       await axiosInstance.put(`/issues/${issueId}/update-status`, { status: newStatus });
       console.log(`Issue ${issueId} updated to ${newStatus}`);
-      refreshData();
-      setStatusUpdates((prev) => ({ ...prev, [issueId]: "" })); // reset selection
+      fetchAllIssues();
+      fetchDashboardData();
+      setStatusUpdates((prev) => ({ ...prev, [issueId]: "" }));
     } catch (error) {
       console.error("Failed to update issue status", error);
     }
@@ -131,11 +123,20 @@ export default function DepartmentIssues() {
     .sort((a, b) => {
       let comparison = 0;
       switch (sortBy) {
-        case "newest": comparison = new Date(b.createdAt) - new Date(a.createdAt); break;
-        case "oldest": comparison = new Date(a.createdAt) - new Date(b.createdAt); break;
-        case "likes": comparison = (b.likedBy?.length || 0) - (a.likedBy?.length || 0); break;
-        case "title": comparison = a.title.localeCompare(b.title); break;
-        default: comparison = 0;
+        case "newest":
+          comparison = new Date(b.createdAt) - new Date(a.createdAt);
+          break;
+        case "oldest":
+          comparison = new Date(a.createdAt) - new Date(b.createdAt);
+          break;
+        case "likes":
+          comparison = (b.likedBy?.length || 0) - (a.likedBy?.length || 0);
+          break;
+        case "title":
+          comparison = a.title.localeCompare(b.title);
+          break;
+        default:
+          comparison = 0;
       }
       return sortOrder === "desc" ? comparison : -comparison;
     });
@@ -154,7 +155,6 @@ export default function DepartmentIssues() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
@@ -163,7 +163,10 @@ export default function DepartmentIssues() {
               <p className="text-gray-600">Track and engage with issues that matter to your community</p>
             </div>
             <button
-              onClick={refreshData}
+              onClick={() => {
+                fetchAllIssues();
+                fetchDashboardData();
+              }}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
@@ -259,80 +262,18 @@ export default function DepartmentIssues() {
           </div>
         ) : (
           <div className={viewMode === "grid" ? "grid grid-cols-1 lg:grid-cols-2 gap-6" : "space-y-4"}>
-            {filteredAndSortedIssues.map((issue) => {
-              const statusConfig = getStatusConfig(issue.status);
-              const priorityConfig = getPriorityConfig(issue.priority);
-
-              return (
-                <div key={issue.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="p-6">
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{issue.title || "Untitled Issue"}</h3>
-                        <p className="text-gray-600 text-sm line-clamp-2 mb-3">{issue.description || "No description provided."}</p>
-                      </div>
-                      <div className="flex flex-col items-end gap-2 ml-4">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${priorityConfig.bg} ${priorityConfig.color} ${priorityConfig.border} border`}>
-                          {issue.priority?.charAt(0).toUpperCase() + issue.priority?.slice(1)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Meta */}
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
-                      <div className="flex items-center gap-1"><MapPin className="w-4 h-4" /><span>{issue.city}</span></div>
-                      <div className="flex items-center gap-1"><User className="w-4 h-4" /><span>{issue.reportedBy}</span></div>
-                      <div className="flex items-center gap-1"><Calendar className="w-4 h-4" /><span>{new Date(issue.createdAt).toLocaleDateString()}</span></div>
-                      <div className="flex items-center gap-1"><Heart className="w-4 h-4 text-red-500" /><span>{issue.likedBy?.length || 0}</span></div>
-                    </div>
-
-                    {/* Footer with Status Update */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-100">
-                      <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border} border`}>
-                        <div className={`w-2 h-2 rounded-full ${statusConfig.dot}`}></div>
-                        {issue.status?.replace(/^\w/, (c) => c.toUpperCase())}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={statusUpdates[issue.id] || ""}
-                          onChange={(e) =>
-                            setStatusUpdates((prev) => ({ ...prev, [issue.id]: e.target.value }))
-                          }
-                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                          <option value="">Update Status</option>
-                          <option value="IN_PROGRESS">In Progress</option>
-                          <option value="DECLINED">Declined</option>
-                          <option value="RESOLVED">Resolved</option>
-                        </select>
-
-                        <button
-                          onClick={() => handleStatusSave(issue.id)}
-                          disabled={!statusUpdates[issue.id]}
-                          className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                            statusUpdates[issue.id]
-                              ? "bg-green-600 text-white hover:bg-green-700"
-                              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          }`}
-                        >
-                          Save
-                        </button>
-                      </div>
-
-                      <button
-                        onClick={() => navigate(`/issue/${issue.id}`)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                      >
-                        <Eye className="w-4 h-4" />
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {filteredAndSortedIssues.map((issue) => (
+              <IssueCard
+                key={issue.id}
+                issue={issue}
+                onNavigate={navigate}
+                onStatusChange={handleStatusChange}
+                onStatusSave={handleStatusSave}
+                statusUpdates={statusUpdates}
+                userId={userDetails.username}
+                viewMode={viewMode}
+              />
+            ))}
           </div>
         )}
       </div>

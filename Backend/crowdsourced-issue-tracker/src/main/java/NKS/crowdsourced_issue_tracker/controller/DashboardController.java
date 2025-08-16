@@ -27,14 +27,23 @@ public class DashboardController {
         List<Issue> allIssues = issueService.getIssuesByCity(city, null);
         List<Issue> pendingIssues = issueService.getIssuesByCity(city, IssueStatus.PENDING);
         List<Issue> resolvedIssues = issueService.getIssuesByCity(city, IssueStatus.RESOLVED);
+        List<Issue> inProgressIssues = issueService.getIssuesByCity(city, IssueStatus.IN_PROGRESS);
         List<Issue> topLikedIssues = issueService.getTopLikedIssues(city, 5);
 
         dashboard.put("totalIssues", allIssues.size());
         dashboard.put("pendingIssues", pendingIssues.size());
         dashboard.put("resolvedIssues", resolvedIssues.size());
-        dashboard.put("topLikedIssues", topLikedIssues);
+//        dashboard.put("topLikedIssues", topLikedIssues);
+        dashboard.put("inProgressIssues",inProgressIssues.size());
 
         return ResponseEntity.ok(dashboard);
+    }
+
+    @GetMapping("/get/analytics/{city}")
+    public ResponseEntity<Map<String, Object>> analyticsDetails(@PathVariable String city) {
+        Map<String, Object> dashboard = new HashMap<>();
+
+
     }
 }
 

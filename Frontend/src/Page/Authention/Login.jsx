@@ -4,8 +4,8 @@ import { useState } from "react"
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Shield, Users, Zap } from "lucide-react"
 import { motion } from "framer-motion"
 import { Link, useNavigate } from "react-router-dom"
-import axiosInstance, { setAuthToken } from "../Config/axios"
-import { login } from "../store/authSlice"
+import axiosInstance, { setAuthToken } from "../../Config/axios"
+import { login } from "../../store/authSlice"
 import { useDispatch } from "react-redux"
 
 export default function Login() {

@@ -1,0 +1,319 @@
+import { useEffect, useState } from "react";
+import {
+  Search,
+  Grid3X3,
+  List,
+  RefreshCw,
+} from "lucide-react";
+import axiosInstance from "../../Config/axios";
+import IssueCard from "../../components/IssueCard";
+
+
+export default function AllIssues() {
+  const [issues, setIssues] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [viewMode, setViewMode] = useState("grid");
+  const [sortBy, setSortBy] = useState("newest");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState([]);
+
+  const userId = "currentUser123"; // Replace with actual user ID from auth
+
+  const navigate = (path) => {
+    console.log(`Navigating to: ${path}`);
+  };
+
+  const fetchAllIssues = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axiosInstance.get("/issues/public/city/Jamshedpur");
+      setIssues(response.data);
+    } catch (error) {
+      console.error("Failed to fetch issues", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await axiosInstance.get("/dashboard/city/Jamshedpur");
+      const dashboardData = response.data;
+
+      const finalStats = [
+        {
+          label: "Total Issues",
+          value: dashboardData.totalIssues || 0,
+          trend: "+0%",
+          color: "bg-blue-600",
+          lightColor: "bg-blue-100",
+        },
+        {
+          label: "Resolved",
+          value: dashboardData.resolvedIssues || 0,
+          trend: "+0%",
+          color: "bg-green-600",
+          lightColor: "bg-green-100",
+        },
+        {
+          label: "Pending",
+          value: dashboardData.pendingIssues || 0,
+          trend: "+0%",
+          color: "bg-red-600",
+          lightColor: "bg-red-100",
+        },
+        {
+          label: "Top Liked",
+          value: dashboardData.topLikedIssues?.length || 0,
+          trend: "+0%",
+          color: "bg-purple-600",
+          lightColor: "bg-purple-100",
+        },
+      ];
+
+      setStats(finalStats);
+    } catch (error) {
+      console.error("Failed to fetch dashboard data", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllIssues();
+    fetchDashboardData();
+  }, []);
+
+  const handleLike = async (issueId) => {
+    try {
+      const response = await axiosInstance.post(`/issues/${issueId}/like`, {
+        userId,
+      });
+      setIssues((prevIssues) =>
+        prevIssues.map((issue) =>
+          issue.id === issueId
+            ? { ...issue, likedBy: response.data.likedBy }
+            : issue
+        )
+      );
+    } catch (error) {
+      console.error("Error liking issue:", error);
+    }
+  };
+
+  const filteredAndSortedIssues = issues
+    .filter((issue) => {
+      const title = issue.title || "";
+      const location = issue.city || "";
+      const status = issue.status?.toLowerCase() || "";
+
+      const matchesSearch =
+        title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        location.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesFilter =
+        selectedFilter === "all" || status === selectedFilter.toLowerCase();
+
+      return matchesSearch && matchesFilter;
+    })
+    .sort((a, b) => {
+      let comparison = 0;
+      switch (sortBy) {
+        case "newest":
+          comparison = new Date(b.createdAt) - new Date(a.createdAt);
+          break;
+        case "oldest":
+          comparison = new Date(a.createdAt) - new Date(b.createdAt);
+          break;
+        case "likes":
+          comparison = (b.likedBy?.length || 0) - (a.likedBy?.length || 0);
+          break;
+        case "title":
+          comparison = a.title.localeCompare(b.title);
+          break;
+        default:
+          comparison = 0;
+      }
+      return sortOrder === "desc" ? comparison : -comparison;
+    });
+
+  const refreshData = () => {
+    fetchAllIssues();
+    fetchDashboardData();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">
+            Loading community issues...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Community Issues
+              </h1>
+              <p className="text-gray-600">
+                Track and engage with issues that matter to your community
+              </p>
+            </div>
+            <button
+              onClick={refreshData}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Refresh
+            </button>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {stats.map((stat, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">
+                      {stat.label}
+                    </p>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <p className="text-2xl font-bold text-gray-900">
+                        {stat.value}
+                      </p>
+                      <span className="text-sm font-medium text-green-600">
+                        {stat.trend}
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    className={`w-12 h-12 ${stat.lightColor} rounded-lg flex items-center justify-center`}
+                  >
+                    <div className={`w-6 h-6 ${stat.color} rounded`}></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search issues by title or location..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <select
+                value={selectedFilter}
+                onChange={(e) => setSelectedFilter(e.target.value)}
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="in progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+              </select>
+
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="likes">Most Liked</option>
+                <option value="title">Alphabetical</option>
+              </select>
+
+              <div className="flex border border-gray-300 rounded-lg">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`p-3 ${
+                    viewMode === "grid"
+                      ? "bg-blue-600 text-white"
+                      : "text-gray-600 hover:bg-gray-50"
+                  } rounded-l-lg transition-colors`}
+                >
+                  <Grid3X3 className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`p-3 ${
+                    viewMode === "list"
+                      ? "bg-blue-600 text-white"
+                      : "text-gray-600 hover:bg-gray-50"
+                  } rounded-r-lg transition-colors`}
+                >
+                  <List className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Results Count */}
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-gray-600">
+            Showing {filteredAndSortedIssues.length} of {issues.length} issues
+          </p>
+        </div>
+
+        {/* Issues Grid/List */}
+        {filteredAndSortedIssues.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No Issues Found
+            </h3>
+            <p className="text-gray-600">
+              Try adjusting your search criteria or filters
+            </p>
+          </div>
+        ) : (
+          <div
+            className={
+              viewMode === "grid"
+                ? "grid grid-cols-1 lg:grid-cols-2 gap-6"
+                : "space-y-4"
+            }
+          >
+            {filteredAndSortedIssues.map((issue) => (
+              <IssueCard
+                key={issue.id}
+                issue={issue}
+                onLike={handleLike}
+                onNavigate={navigate}
+                userId={userId}
+                viewMode={viewMode}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

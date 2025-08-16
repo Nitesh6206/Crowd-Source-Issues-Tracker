@@ -36,10 +36,17 @@ public class IssueController {
         return ResponseEntity.ok(issue);
     }
 
+//    @PostMapping("/{issueId}/like")
+//    public ResponseEntity<Issue> likeIssue(@PathVariable String issueId) {
+//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+//        Issue issue = issueService.likeIssue(issueId, username);
+//        return ResponseEntity.ok(issue);
+//    }
+    // Toggle Like/Unlike
     @PostMapping("/{issueId}/like")
-    public ResponseEntity<Issue> likeIssue(@PathVariable String issueId) {
+    public ResponseEntity<Issue> toggleLike(@PathVariable String issueId) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Issue issue = issueService.likeIssue(issueId, username);
+        Issue issue = issueService.toggleLike(issueId, username);
         return ResponseEntity.ok(issue);
     }
     @GetMapping("/latest/posts")

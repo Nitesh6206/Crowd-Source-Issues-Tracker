@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../Config/axios";
+import axiosInstance from "../../Config/axios";
 
 export default function ReportNewIssue() {
   const navigate = useNavigate();

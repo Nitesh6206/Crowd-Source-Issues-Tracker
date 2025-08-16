@@ -16,8 +16,8 @@ import {
   MessageCircle,
 } from "lucide-react"
 import { motion } from "framer-motion"
-import axiosInstance from "../Config/axios"
 import { a } from "framer-motion/client"
+import axiosInstance from "../../Config/axios"
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false)

@@ -1,15 +1,16 @@
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
-import Login from "./Page/Login";
-import Register from "./Page/Register";
-import Dashboard from "./Page/Dashboard";
-import Profile from "./Page/Profile";
-import Settings from "./Page/Settings";
-import ReportNewIssue from "./Page/ReportNewIssue";
-import AllIssues from "./Page/AllIssues";
-import MyIssue from "./Page/MyIssue";
+import AllIssues from "./Page/Common/AllIssues.jsx";
 import ProtectedLayout from "./components/ProtectedRoute";
-import DepartmentIssues from "./Page/DepartmentIsuses.jsx";
+import Login from "./Page/Authention/Login.jsx";
+import Register from "./Page/Authention/Register.jsx";
+import Profile from "./Page/Common/Profile.jsx";
+import ReportNewIssue from "./Page/Users/ReportNewIssue.jsx";
+import MyIssue from "./Page/Users/MyIssue.jsx";
+import Dashboard from "./components/Dashboard.jsx";
+import DepartmentIssues from "./Page/Department/DepartmentIsuses.jsx";
+import { Settings } from "lucide-react";
+import Analytics from "./Page/Common/Analytics.jsx";
 
 // Public Auth Layout
 function AuthLayout() {
@@ -58,6 +59,7 @@ export default function App() {
         {/* Shared routes for both roles */}
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/analytics" element={<Analytics />} />
       </Route>
 
 
