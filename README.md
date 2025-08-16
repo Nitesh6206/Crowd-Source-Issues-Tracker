@@ -95,11 +95,3 @@ To contribute:
 
 > Please ensure your code follows the existing style and includes necessary tests where applicable.
 
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**.  
-For more details, refer to the [LICENSE](LICENSE) file.
-
----
