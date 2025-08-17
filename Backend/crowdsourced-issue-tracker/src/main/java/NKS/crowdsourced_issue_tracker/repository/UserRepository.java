@@ -1,5 +1,6 @@
 package NKS.crowdsourced_issue_tracker.repository;
 
+import NKS.crowdsourced_issue_tracker.model.Category;
 import NKS.crowdsourced_issue_tracker.model.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
@@ -7,6 +8,8 @@ import java.util.Optional;
 
 public interface UserRepository extends MongoRepository<User, String> {
     Optional<User> findByUsername(String username);
+
+    User findByCityAndCategory(String city, Category category);
 }
 
 

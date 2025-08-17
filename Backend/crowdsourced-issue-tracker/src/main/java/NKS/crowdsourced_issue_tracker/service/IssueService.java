@@ -1,6 +1,5 @@
 package NKS.crowdsourced_issue_tracker.service;
 
-
 import NKS.crowdsourced_issue_tracker.Mapper.IssueMapper;
 import NKS.crowdsourced_issue_tracker.dto.IssueDTO;
 import NKS.crowdsourced_issue_tracker.model.Issue;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -24,66 +22,85 @@ import java.util.Optional;
 public class IssueService {
 
     private final IssueRepository issueRepository;
-
-    @Autowired
-    private JavaMailSender mailSender;
+    private final UserRepository userRepository;
+    private final IssueMapper issueMapper;
+    private final JavaMailSender mailSender;
 
     @Value("${sendemail}")
     private String senderEmail;
 
-
-
-    private  final UserRepository userRepository;
-
-    private  final IssueMapper issueMapper;
-    public Optional<List<Issue>> getUserCreatedIssues(String username){
-        return issueRepository.findByReportedBy(username);
-    }
-
-    public IssueService(IssueRepository issueRepository, UserRepository userRepository, IssueMapper issueMapper) {
+    @Autowired
+    public IssueService(IssueRepository issueRepository,
+                        UserRepository userRepository,
+                        IssueMapper issueMapper,
+                        JavaMailSender mailSender) {
         this.issueRepository = issueRepository;
         this.userRepository = userRepository;
-        this.issueMapper=issueMapper;
+        this.issueMapper = issueMapper;
+        this.mailSender = mailSender;
+    }
+
+    public Optional<List<IssueDTO>> getUserCreatedIssues(String username) {
+        User user = getUserByUsername(username);
+        List<IssueDTO> issuesList = issueRepository.findByReportedBy(user)
+                .stream()
+                .map(issueMapper::toDTO)
+                .toList();
+        return Optional.of(issuesList);
     }
 
     public IssueDTO createIssue(IssueDTO issueDTO) {
-        System.out.println(issueDTO);
-        Issue issue=issueMapper.toEntity(issueDTO);
-        issue.setReportedBy(SecurityContextHolder.getContext().getAuthentication().getName());
+        Issue issue = issueMapper.toEntity(issueDTO);
+
+        User reporter = getLoggedInUser();
+        issue.setReportedBy(reporter);
         issue.setCreatedAt(LocalDateTime.now());
         issue.setUpdatedAt(LocalDateTime.now());
-        Issue saved=issueRepository.save(issue);
-        return issueMapper.toDTO(saved);
+
+        // If needed: assign to department user
+        User departmentUser = userRepository.findByCityAndCategory(reporter.getCity(), issueDTO.getCategory());
+        // TODO: handle departmentUser usage if required
+
+        return issueMapper.toDTO(issueRepository.save(issue));
     }
 
     public IssueDTO resolveIssue(String issueId, IssueDTO issueDTO) {
-        Issue issue = issueRepository.findById(issueId)
-                .orElseThrow(() -> new RuntimeException("Issue not found"));
-        String username=SecurityContextHolder.getContext().getAuthentication().getName();
-        if(username.equals(issue.getReportedBy())) throw new RuntimeException("Not Created by same user");
+        Issue issue = getIssueById(issueId);
+        User currentUser = getLoggedInUser();
+
+        if (currentUser.getId().equals(issue.getReportedBy().getId())) {
+            throw new RuntimeException("Reporter cannot resolve their own issue");
+        }
+
         issue.setStatus(IssueStatus.RESOLVED);
         issue.setResolvedPhoto(issueDTO.getResolvedPhoto());
-        issue.setResolvedBy(SecurityContextHolder.getContext().getAuthentication().getName());
+        issue.setResolvedBy(currentUser);
         issue.setUpdatedAt(LocalDateTime.now());
-        Issue saved= issueRepository.save(issue);
-        return issueMapper.toDTO(saved);
+
+        return issueMapper.toDTO(issueRepository.save(issue));
     }
 
-    public Issue likeIssue(String issueId, String username) {
-        Issue issue = issueRepository.findById(issueId)
-                .orElseThrow(() -> new RuntimeException("Issue not found"));
-        if (!issue.getLikedBy().contains(username)) {
+    public Issue toggleLike(String issueId, String username) {
+        Issue issue = getIssueById(issueId);
+
+        if (issue.getLikedBy().contains(username)) {
+            issue.getLikedBy().remove(username);
+        } else {
             issue.getLikedBy().add(username);
-            issue.setUpdatedAt(LocalDateTime.now());
         }
+
+        issue.setUpdatedAt(LocalDateTime.now());
         return issueRepository.save(issue);
     }
 
-    public List<Issue> getIssuesByCity(String city, IssueStatus status) {
-        if (status != null) {
-            return issueRepository.findByCityAndStatus(city, status);
-        }
-        return issueRepository.findByCity(city);
+    public List<IssueDTO> getIssuesByCity(String city, IssueStatus status) {
+        List<Issue> issues = (status != null)
+                ? issueRepository.findByCityAndStatus(city, status)
+                : issueRepository.findByCity(city);
+
+        return issues.stream()
+                .map(issueMapper::toDTO)
+                .toList();
     }
 
     public List<Issue> getTopLikedIssues(String city, int limit) {
@@ -93,22 +110,26 @@ public class IssueService {
                 .toList();
     }
 
-    public List<Issue> getLatestIssues() {
-        return issueRepository.findTop5ByOrderByCreatedAtDesc();
+    public Optional<List<IssueDTO>> getLatestIssues() {
+        List<IssueDTO> issuesList= issueRepository.findTop5ByOrderByCreatedAtDesc()
+                .stream()
+                .map(issueMapper::toDTO)
+                .toList();
+
+        return Optional.of(issuesList);
+
     }
 
     public String updateIssues(String issueId, IssueDTO issueDTO) {
-        Issue issue=issueRepository.findById(issueId)
-                .orElseThrow(()-> new RuntimeException("issues not found"));
+        Issue issue = getIssueById(issueId);
         issue.setStatus(issueDTO.getStatus());
         issueRepository.save(issue);
-        sendNotification(issueDTO,issue.getReportedBy());
 
-        return "Issues Status Update Successfully";
+        sendNotification(issue.getReportedBy(), "Issue status updated", "Status updated on your reported issue");
+        return "Issue Status Updated Successfully";
     }
 
-
-    public void sendEmail(String email,String subject,String text) {
+    private void sendEmail(String email, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(senderEmail);
         message.setTo(email);
@@ -117,30 +138,23 @@ public class IssueService {
         mailSender.send(message);
     }
 
-    public void  sendNotification(IssueDTO issueDTO,String username){
-        System.out.println(username);
-        User user=userRepository.findByUsername(username)
-                .orElseThrow(()-> new RuntimeException("Reported user not found"));
-        String message="Status Updated on you issues reported";
-        String  subject="status updated";
-
-            sendEmail(user.getEmail(),subject,message);
-
+    private void sendNotification(User user, String subject, String message) {
+        sendEmail(user.getEmail(), subject, message);
     }
 
-    public Issue toggleLike(String issueId, String username) {
-        Issue issue = issueRepository.findById(issueId)
+    // 🔹 Helper methods to reduce code duplication
+    private User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    private User getLoggedInUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return getUserByUsername(username);
+    }
+
+    private Issue getIssueById(String issueId) {
+        return issueRepository.findById(issueId)
                 .orElseThrow(() -> new RuntimeException("Issue not found"));
-
-        // Check if user already liked
-        if (issue.getLikedBy().contains(username)) {
-            // Unlike
-            issue.getLikedBy().remove(username);
-        } else {
-            // Like
-            issue.getLikedBy().add(username);
-        }
-
-        return issueRepository.save(issue);
     }
 }

@@ -26,15 +26,16 @@ export default function ReportNewIssue() {
   const [files, setFiles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // ✅ Categories now mapped to enum values
   const categories = [
-    "Roads & Infrastructure",
-    "Street Lighting",
-    "Waste Management",
-    "Water & Drainage",
-    "Public Safety",
-    "Parks & Recreation",
-    "Traffic & Transportation",
-    "Other",
+    { value: "ROADS_INFRASTRUCTURE", label: "Roads & Infrastructure" },
+    { value: "STREET_LIGHTING", label: "Street Lighting" },
+    { value: "WASTE_MANAGEMENT", label: "Waste Management" },
+    { value: "WATER_DRAINAGE", label: "Water & Drainage" },
+    { value: "PUBLIC_SAFETY", label: "Public Safety" },
+    { value: "PARKS_RECREATION", label: "Parks & Recreation" },
+    { value: "TRAFFIC_TRANSPORTATION", label: "Traffic & Transportation" },
+    { value: "OTHER", label: "Other" },
   ];
 
   const priorities = [
@@ -68,10 +69,17 @@ export default function ReportNewIssue() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const response = await axiosInstance.post("/issues", formData)
-    console.log(response.data)
-    setIsSubmitting(false);
-    navigate("/dashboard");
+
+    try {
+      const response = await axiosInstance.post("/issues", formData);
+      console.log("✅ Issue submitted:", response.data);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("❌ Error submitting issue:", error);
+      alert("Failed to submit issue. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // ✅ Location detection + reverse geocoding
@@ -186,9 +194,9 @@ export default function ReportNewIssue() {
                   className="w-full px-6 py-4 bg-gray-50/50 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 hover:border-gray-300 text-lg"
                 >
                   <option value="">Select a category</option>
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
+                  {categories.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
                     </option>
                   ))}
                 </select>
@@ -325,7 +333,10 @@ export default function ReportNewIssue() {
                     </p>
                     <div className="space-y-2">
                       {files.map((file, index) => (
-                        <p key={index} className="text-gray-600 flex items-center gap-2">
+                        <p
+                          key={index}
+                          className="text-gray-600 flex items-center gap-2"
+                        >
                           <FileText className="w-4 h-4" />
                           {file.name}
                         </p>

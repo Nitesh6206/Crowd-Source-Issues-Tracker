@@ -3,6 +3,7 @@ package NKS.crowdsourced_issue_tracker.repository;
 
 import NKS.crowdsourced_issue_tracker.model.Issue;
 import NKS.crowdsourced_issue_tracker.model.IssueStatus;
+import NKS.crowdsourced_issue_tracker.model.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -15,7 +16,7 @@ public interface IssueRepository extends MongoRepository<Issue, String> {
 
     List<Issue> findTop5ByOrderByCreatedAtDesc();
 
-    Optional<List<Issue>> findByReportedBy(String username);
+    List<Issue> findByReportedBy(User reportedBy);
 }
 
 

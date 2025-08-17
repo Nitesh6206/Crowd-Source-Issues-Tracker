@@ -64,7 +64,7 @@ export default function Dashboard() {
 
   const getLatestIssues = async () => {
     try {
-      const response = await axiosInstance.get("/issues/latest/posts");
+      const response = await axiosInstance.get("/issues/latest");
       const issues = response.data.map((issue) => ({
         ...issue,
         status: issue.status.toLowerCase(),

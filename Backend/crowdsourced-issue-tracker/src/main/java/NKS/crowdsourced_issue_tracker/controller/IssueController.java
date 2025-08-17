@@ -1,6 +1,5 @@
 package NKS.crowdsourced_issue_tracker.controller;
 
-
 import NKS.crowdsourced_issue_tracker.dto.IssueDTO;
 import NKS.crowdsourced_issue_tracker.model.Issue;
 import NKS.crowdsourced_issue_tracker.model.IssueStatus;
@@ -9,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLOutput;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,59 +24,52 @@ public class IssueController {
 
     @PostMapping
     public ResponseEntity<IssueDTO> createIssue(@RequestBody IssueDTO issueDTO) {
-        IssueDTO issuedto = issueService.createIssue(issueDTO);
-        return ResponseEntity.ok(issuedto);
+        return ResponseEntity.ok(issueService.createIssue(issueDTO));
     }
 
     @PutMapping("/{issueId}/resolve")
     public ResponseEntity<IssueDTO> resolveIssue(@PathVariable String issueId, @RequestBody IssueDTO issueDTO) {
-        IssueDTO issue = issueService.resolveIssue(issueId, issueDTO);
-        return ResponseEntity.ok(issue);
+        return ResponseEntity.ok(issueService.resolveIssue(issueId, issueDTO));
     }
 
-//    @PostMapping("/{issueId}/like")
-//    public ResponseEntity<Issue> likeIssue(@PathVariable String issueId) {
-//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-//        Issue issue = issueService.likeIssue(issueId, username);
-//        return ResponseEntity.ok(issue);
-//    }
-    // Toggle Like/Unlike
     @PostMapping("/{issueId}/like")
     public ResponseEntity<Issue> toggleLike(@PathVariable String issueId) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Issue issue = issueService.toggleLike(issueId, username);
-        return ResponseEntity.ok(issue);
+        String username = getLoggedInUsername();
+        return ResponseEntity.ok(issueService.toggleLike(issueId, username));
     }
-    @GetMapping("/latest/posts")
-    public ResponseEntity<List<Issue>> recentPost(){
-        List<Issue> issueses=issueService.getLatestIssues();
-        return  ResponseEntity.ok(issueses);
+
+    @GetMapping("/latest")
+    public ResponseEntity<Optional<List<IssueDTO>>> getLatestIssues() {
+        return ResponseEntity.ok(issueService.getLatestIssues());
     }
 
     @GetMapping("/public/city/{city}")
-    public ResponseEntity<List<Issue>> getIssuesByCity(@PathVariable String city,
-                                                       @RequestParam(required = false) IssueStatus status) {
+    public ResponseEntity<List<IssueDTO>> getPublicIssuesByCity(@PathVariable String city,
+                                                                @RequestParam(required = false) IssueStatus status) {
         return ResponseEntity.ok(issueService.getIssuesByCity(city, status));
     }
 
-
     @GetMapping("/department/city/{city}")
-    public ResponseEntity<List<Issue>> getDepartmentIssues(@PathVariable String city,
-                                                           @RequestParam(required = false) IssueStatus status) {
+    public ResponseEntity<List<IssueDTO>> getDepartmentIssues(@PathVariable String city,
+                                                              @RequestParam(required = false) IssueStatus status) {
         return ResponseEntity.ok(issueService.getIssuesByCity(city, status));
     }
 
     @GetMapping("/my-issues")
-    public ResponseEntity<Optional<List<Issue>>> getUserCreatedIssues(){
-        String username=SecurityContextHolder.getContext().getAuthentication().getName();
-        return  ResponseEntity.ok(issueService.getUserCreatedIssues(username));
+    public ResponseEntity<List<IssueDTO>> getUserCreatedIssues() {
+        String username = getLoggedInUsername();
+        return issueService.getUserCreatedIssues(username)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{issueId}/update-status")
-    public ResponseEntity<String> updateIssuesStatus(@PathVariable String issueId, @RequestBody IssueDTO issueDTO) {
-        System.out.println(issueDTO);
-        String res = issueService.updateIssues(issueId, issueDTO);
-        return ResponseEntity.ok(res);
+    @PutMapping("/{issueId}/status")
+    public ResponseEntity<String> updateIssueStatus(@PathVariable String issueId, @RequestBody IssueDTO issueDTO) {
+        return ResponseEntity.ok(issueService.updateIssues(issueId, issueDTO));
     }
 
+    // 🔹 Utility method for logged-in user
+    private String getLoggedInUsername() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
 }

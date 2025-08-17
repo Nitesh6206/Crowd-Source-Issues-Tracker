@@ -254,11 +254,11 @@ export default function MyIssue() {
                           {issue.description || "No description provided."}
                         </p>
                       </div>
-                      <div className="flex flex-col items-end gap-2 ml-4">
+                      {/* <div className="flex flex-col items-end gap-2 ml-4">
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${priorityConfig.bg} ${priorityConfig.color} ${priorityConfig.border} border`}>
                           {issue.priority?.charAt(0).toUpperCase() + issue.priority?.slice(1)}
                         </span>
-                      </div>
+                      </div> */}
                     </div>
 
                     {/* Issue Meta */}

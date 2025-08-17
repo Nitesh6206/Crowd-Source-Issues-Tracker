@@ -1,5 +1,6 @@
 package NKS.crowdsourced_issue_tracker.controller;
 
+import NKS.crowdsourced_issue_tracker.dto.IssueDTO;
 import NKS.crowdsourced_issue_tracker.model.Issue;
 import NKS.crowdsourced_issue_tracker.model.IssueStatus;
 import NKS.crowdsourced_issue_tracker.service.IssueService;
@@ -24,27 +25,21 @@ public class DashboardController {
     @GetMapping("/city/{city}")
     public ResponseEntity<Map<String, Object>> getDashboard(@PathVariable String city) {
         Map<String, Object> dashboard = new HashMap<>();
-        List<Issue> allIssues = issueService.getIssuesByCity(city, null);
-        List<Issue> pendingIssues = issueService.getIssuesByCity(city, IssueStatus.PENDING);
-        List<Issue> resolvedIssues = issueService.getIssuesByCity(city, IssueStatus.RESOLVED);
-        List<Issue> inProgressIssues = issueService.getIssuesByCity(city, IssueStatus.IN_PROGRESS);
-        List<Issue> topLikedIssues = issueService.getTopLikedIssues(city, 5);
 
+        // Fetch issues by status
+        List<IssueDTO> allIssues = issueService.getIssuesByCity(city, null);
+        List<IssueDTO> pendingIssues = issueService.getIssuesByCity(city, IssueStatus.PENDING);
+        List<IssueDTO> resolvedIssues = issueService.getIssuesByCity(city, IssueStatus.RESOLVED);
+        List<IssueDTO> inProgressIssues = issueService.getIssuesByCity(city, IssueStatus.IN_PROGRESS);
+//        List<IssueDTO> topLikedIssues = issueService.getTopLikedIssues(city, 5);
+
+        // Populate dashboard data
         dashboard.put("totalIssues", allIssues.size());
         dashboard.put("pendingIssues", pendingIssues.size());
         dashboard.put("resolvedIssues", resolvedIssues.size());
-//        dashboard.put("topLikedIssues", topLikedIssues);
-        dashboard.put("inProgressIssues",inProgressIssues.size());
+        dashboard.put("inProgressIssues", inProgressIssues.size());
+//        dashboard.put("topLikedIssues", topLikedIssues); // optionally include full objects
 
         return ResponseEntity.ok(dashboard);
     }
-
-    @GetMapping("/get/analytics/{city}")
-    public ResponseEntity<Map<String, Object>> analyticsDetails(@PathVariable String city) {
-        Map<String, Object> dashboard = new HashMap<>();
-
-
-    }
 }
-
-

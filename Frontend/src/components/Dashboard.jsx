@@ -94,13 +94,13 @@ export default function Dashboard() {
 
   const getLatestIssues = async () => {
     try {
-      const response = await axiosInstance.get("/issues/latest/posts");
+      const response = await axiosInstance.get("/issues/latest");
       const issues = response.data.map((issue) => ({
         ...issue,
         status: issue.status.toLowerCase(),
         priority: issue.priorityLevel?.toLowerCase() || "normal",
-        likes: issue.likedBy.length,
-        isLiked: issue.likedBy.includes(userDetails.username),
+        // likes: issue.likedBy.length,
+        // isLiked: issue.likedBy.includes(userDetails.username),
         time: new Date(issue.createdAt).toLocaleString(),
         image: issue.photo,
       }));
@@ -269,7 +269,7 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {filteredIssues.map((issue) => (
+                    {filteredIssues.map((issue, index) => (
                       <IssueCard
                         key={issue.id}
                         issue={issue}
