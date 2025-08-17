@@ -76,6 +76,8 @@ Take a look at the interface in action:
 <img width="100%" alt="Issue List View" src="https://github.com/user-attachments/assets/da7ab454-4951-49cc-ba4d-681737096734" />
 
 <img width="100%" alt="Admin Panel" src="https://github.com/user-attachments/assets/86428e97-9cc5-4ffd-9784-5b5eefaa6e60" />
+<img width="1133" height="677" alt="Screenshot 2025-08-17 at 1 18 27 AM" src="https://github.com/user-attachments/assets/85716303-c0f7-4d92-80f4-4c1ea823f77e" />
+
 
 ---
 
